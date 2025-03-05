@@ -257,7 +257,7 @@ impl ThreadService for ThreadServiceImpl {
                     }
 
                     Ok(ThreadRunItem::ThreadAssistantMessageAttachmentsCodeFileList(x)) => {
-                        db.update_thread_message_code_file_list_attachment(assistant_message_id, &x.file_list).await?;
+                        db.update_thread_message_code_file_list_attachment(assistant_message_id, &x.file_list, x.truncated).await?;
                     }
 
                     Ok(ThreadRunItem::ThreadAssistantMessageAttachmentsCode(x)) => {
@@ -462,10 +462,14 @@ mod tests {
 
     use super::*;
     use crate::{
-        answer::testutils::{
-            make_repository_service, FakeChatCompletionStream, FakeCodeSearch, FakeContextService,
-            FakeDocSearch,
+        answer::{
+            self,
+            testutils::{
+                make_repository_service, FakeChatCompletionStream, FakeCodeSearch,
+                FakeContextService, FakeDocSearch,
+            },
         },
+        retrieval,
         service::auth,
     };
 
@@ -726,14 +730,18 @@ mod tests {
         let serper = Some(Box::new(FakeDocSearch) as Box<dyn DocSearch>);
         let config = make_answer_config();
         let repo = make_repository_service(db.clone()).await.unwrap();
-        let answer_service = Arc::new(crate::answer::create(
-            &config,
-            auth.clone(),
-            chat.clone(),
+        let retrieval = Arc::new(retrieval::create(
             code.clone(),
             doc.clone(),
-            context.clone(),
             serper,
+            repo.clone(),
+        ));
+        let answer_service = Arc::new(answer::create(
+            &config,
+            auth,
+            chat,
+            retrieval,
+            context.clone(),
             repo,
         ));
         let service = create(db.clone(), Some(answer_service), None, context);

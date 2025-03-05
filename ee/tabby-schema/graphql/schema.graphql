@@ -152,12 +152,12 @@ input CreateMessageInput {
 }
 
 input CreatePageRunInput {
-  title: String!
+  titlePrompt: String!
 }
 
 input CreatePageSectionRunInput {
   pageId: ID!
-  title: String!
+  titlePrompt: String!
 }
 
 input CreateThreadAndRunInput {
@@ -574,6 +574,7 @@ type MessageAttachmentCode {
 
 type MessageAttachmentCodeFileList {
   fileList: [String!]!
+  truncated: Boolean!
 }
 
 type MessageAttachmentCodeScores {
@@ -1004,6 +1005,7 @@ type ThreadAssistantMessageAttachmentsCode {
 
 type ThreadAssistantMessageAttachmentsCodeFileList {
   fileList: [String!]!
+  truncated: Boolean!
 }
 
 type ThreadAssistantMessageAttachmentsDoc {
